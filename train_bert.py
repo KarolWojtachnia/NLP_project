@@ -8,25 +8,25 @@ import numpy as np
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from sklearn.preprocessing import LabelEncoder
 
-class BERT_Arch(nn.Module):
-    def __init__(self, bert):
-        super(BERT_Arch, self).__init__()
-        self.bert = bert 
-        self.dropout = nn.Dropout(0.1)
-        self.relu =  nn.ReLU()
-        self.fc1 = nn.Linear(768,512)
-        self.fc2 = nn.Linear(512,2)
-        self.softmax = nn.LogSoftmax(dim=1)
+# class BERT_Arch(nn.Module):
+#     def __init__(self, bert):
+#         super(BERT_Arch, self).__init__()
+#         self.bert = bert 
+#         self.dropout = nn.Dropout(0.1)
+#         self.relu =  nn.ReLU()
+#         self.fc1 = nn.Linear(768,512)
+#         self.fc2 = nn.Linear(512,2)
+#         self.softmax = nn.LogSoftmax(dim=1)
 
-    #define the forward pass
-    def forward(self, sent_id, mask):
-        _, cls_hs = self.bert(sent_id, attention_mask=mask, return_dict=False)
-        x = self.fc1(cls_hs)
-        x = self.relu(x)
-        x = self.dropout(x)
-        x = self.fc2(x)
-        x = self.softmax(x)
-        return x
+#     #define the forward pass
+#     def forward(self, sent_id, mask):
+#         _, cls_hs = self.bert(sent_id, attention_mask=mask, return_dict=False)
+#         x = self.fc1(cls_hs)
+#         x = self.relu(x)
+#         x = self.dropout(x)
+#         x = self.fc2(x)
+#         x = self.softmax(x)
+#         return x
 
 
 EPOCHS = 10
@@ -48,23 +48,24 @@ tokens_train = tokenizer.batch_encode_plus(
     X_train.tolist(),
     max_length = 25,
     pad_to_max_length=True,
-    truncation=True
+    truncation=True,
+    return_tensors='pt'
 )
 
 X_train = torch.tensor(label_encoder.fit_transform(X_train))
 y_train = torch.tensor(y_train.astype(int))
 
-tokens_val = tokenizer.batch_encode_plus(
-    X_val.tolist(),
-    max_length = 25,
-    pad_to_max_length=True,
-    truncation=True
-)
-X_val = torch.tensor(label_encoder.fit_transform(X_val))
-y_val = torch.tensor(y_val.astype(int))
+# tokens_val = tokenizer.batch_encode_plus(
+#     X_val.tolist(),
+#     max_length = 25,
+#     pad_to_max_length=True,
+#     truncation=True
+# )
+# X_val = torch.tensor(label_encoder.fit_transform(X_val))
+# y_val = torch.tensor(y_val.astype(int))
 
 
-train_mask = torch.tensor(tokens_train['attention_mask'])
+train_mask = tokens_train['attention_mask']
 train_data = TensorDataset(X_train, train_mask, y_train)
 train_sampler = RandomSampler(train_data)
 train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=BATCH_SIZE)
@@ -76,7 +77,8 @@ val_dataloader = DataLoader(val_data, sampler=val_sampler, batch_size=BATCH_SIZE
 
 
 # Model
-model = BERT_Arch(bert).to(device)
+# model = BERT_Arch(bert).to(device)
+model = bert()
 
 optimizer = AdamW(model.parameters(), lr=1e-5)
 cross_entropy  = nn.CrossEntropyLoss()
@@ -91,7 +93,7 @@ def train():
         batch = [r.to(device) for r in batch]
         sent_id, mask, labels = batch
 
-        preds = model(sent_id, mask)
+        preds = model(sent_id.unsqueeze(0), mask)
         loss = cross_entropy(preds, labels)
         total_loss = total_loss + loss.item()
 

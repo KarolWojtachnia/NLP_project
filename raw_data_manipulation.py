@@ -7,9 +7,9 @@ from sklearn.model_selection import train_test_split
 y_array = []
 x_array = []
 
-banned_words = ["\n", "@anonymized_account"]
+banned_words = ["\n", "@anonymized_account", "?", ".", ]
 
-# Function to delete emojis
+# Function to delete emojisP
 def deEmojify(text):
     regrex_pattern = re.compile(pattern = "["
         u"\U0001F600-\U0001F64F"  # emoticons
@@ -70,3 +70,27 @@ with open ('X_val.npy', 'wb') as file:
 with open ('y_val.npy', 'wb') as file:
     np.save(file, y_val)
 
+
+# And the test set now
+
+x_array_forTest = []
+y_array_forTest = []
+
+with open('test_set_clean_only_text.txt', 'r', encoding='utf-8') as tags:
+    content = tags.readlines()
+
+    for line in content:
+        line = ' '.join(w for w in line.split() if w not in banned_words)
+        line = deEmojify(line)
+        x_array_forTest.append(line)
+
+with open('test_set_clean_only_tags.txt', 'r', encoding='utf-8') as tags:
+    content = tags.readlines()
+    for line in content:
+        y_array_forTest.append(int(line))
+
+with open ("X_forTest.npy", 'wb') as file:
+    np.save(file, x_array_forTest)
+
+with open ("Y_forTest.npy", 'wb') as file:
+    np.save(file, y_array_forTest)
