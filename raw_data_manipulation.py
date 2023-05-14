@@ -37,10 +37,16 @@ with open('training_set_clean_only_text.txt', 'r', encoding='utf-8') as tags:
 with open('training_set_clean_only_tags.txt', 'r', encoding='utf-8') as tags:
     content = tags.readlines()
     for line in content:
-        y_array.append(line)
+        y_array.append(int(line))
 
 X = x_array
 y = y_array
+
+with open ("X.npy", 'wb') as file:
+    np.save(file, x_array)
+
+with open ("Y.npy", 'wb') as file:
+    np.save(file, y_array)
 
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 train_class_ratios = np.bincount(y_train) / len(y_train)
