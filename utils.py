@@ -3,7 +3,7 @@ import torch
 from tqdm.notebook import tqdm
 from torch.utils.data import Dataset
 
-# Class responsible for data handling for GPT2
+# Class responsible for data handling
 class MovieReviewsDataset(Dataset):
 
   def __init__(self, is_for_test):
@@ -35,8 +35,8 @@ class MovieReviewsDataset(Dataset):
   
  
 
-# Collaor for GPT2 classification, used in the DataLoader to create the bathes of data that get fed to the model
-class Gpt2ClassificationCollator(object):
+# Collaor for classification, used in the DataLoader to create the bathes of data that get fed to the model
+class ClassificationCollator(object):
 
     def __init__(self, use_tokenizer, labels_encoder, max_sequence_len=None):
 

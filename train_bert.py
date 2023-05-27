@@ -1,12 +1,12 @@
 from transformers import BertModel, BertTokenizerFast
 import torch.nn as nn
 import torch
-from transformers import AdamW
 from sklearn.utils.class_weight import compute_class_weight
 import tqdm
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from sklearn.preprocessing import LabelEncoder
+from torch.optim import AdamW
 
 # class BERT_Arch(nn.Module):
 #     def __init__(self, bert):
@@ -40,13 +40,12 @@ y_train = np.load('y_train.npy')
 X_val = np.load('X_val.npy')
 y_val = np.load('y_val.npy')
 
-bert = BertModel.from_pretrained('bert-base-uncased')
 tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
 label_encoder = LabelEncoder()
 
 tokens_train = tokenizer.batch_encode_plus(
     X_train.tolist(),
-    max_length = 25,
+    max_length = BATCH_SIZE,
     pad_to_max_length=True,
     truncation=True,
     return_tensors='pt'
@@ -55,14 +54,14 @@ tokens_train = tokenizer.batch_encode_plus(
 X_train = torch.tensor(label_encoder.fit_transform(X_train))
 y_train = torch.tensor(y_train.astype(int))
 
-# tokens_val = tokenizer.batch_encode_plus(
-#     X_val.tolist(),
-#     max_length = 25,
-#     pad_to_max_length=True,
-#     truncation=True
-# )
-# X_val = torch.tensor(label_encoder.fit_transform(X_val))
-# y_val = torch.tensor(y_val.astype(int))
+tokens_val = tokenizer.batch_encode_plus(
+    X_val.tolist(),
+    max_length = BATCH_SIZE,
+    pad_to_max_length=True,
+    truncation=True
+)
+X_val = torch.tensor(label_encoder.fit_transform(X_val))
+y_val = torch.tensor(y_val.astype(int))
 
 
 train_mask = tokens_train['attention_mask']
@@ -78,7 +77,7 @@ val_dataloader = DataLoader(val_data, sampler=val_sampler, batch_size=BATCH_SIZE
 
 # Model
 # model = BERT_Arch(bert).to(device)
-model = bert()
+model = BertModel.from_pretrained('bert-base-uncased')
 
 optimizer = AdamW(model.parameters(), lr=1e-5)
 cross_entropy  = nn.CrossEntropyLoss()
@@ -92,9 +91,13 @@ def train():
         model.zero_grad()
         batch = [r.to(device) for r in batch]
         sent_id, mask, labels = batch
-
-        preds = model(sent_id.unsqueeze(0), mask)
-        loss = cross_entropy(preds, labels)
+        preds = model(sent_id.unsqueeze(0), mask,return_dict=False)
+        num_labels = 2 
+        classifier = nn.Linear(model.config.hidden_size, num_labels)
+        logits = classifier(preds[0])
+        labels = torch.tensor(labels)
+        loss = cross_entropy(logits.view(-1, num_labels), labels.view(-1))
+        # loss = cross_entropy(preds, labels)
         total_loss = total_loss + loss.item()
 
         loss.backward()
