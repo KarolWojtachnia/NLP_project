@@ -1,3 +1,5 @@
+# Na podstawie https://gmihaila.github.io/tutorial_notebooks/gpt2_finetune_classification/
+
 import numpy as np
 import torch
 from tqdm.notebook import tqdm

@@ -1,3 +1,5 @@
+# Na podstawie https://gmihaila.github.io/tutorial_notebooks/gpt2_finetune_classification/
+
 from utils import ClassificationCollator, MovieReviewsDataset, train, validation
 import io
 import os

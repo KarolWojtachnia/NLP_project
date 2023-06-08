@@ -1,3 +1,5 @@
+# Na podstawie https://gmihaila.github.io/tutorial_notebooks/gpt2_finetune_classification/
+
 from torch.utils.data import DataLoader
 from utils import ClassificationCollator, MovieReviewsDataset, train, validation
 from sklearn.metrics import classification_report, accuracy_score
