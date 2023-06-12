@@ -1,6 +1,6 @@
 # Na podstawie https://gmihaila.github.io/tutorial_notebooks/gpt2_finetune_classification/
 
-from utils import ClassificationCollator, MovieReviewsDataset, train, validation
+from utils import ClassificationCollator, PolEvalDataset, train, validation
 import io
 import os
 import torch
@@ -17,8 +17,17 @@ from transformers import (AutoConfig,
 
 set_seed(1235)
 model_name_or_path = 'bert-base-cased'
-train_dataset = MovieReviewsDataset(False)
-validation_dataset = MovieReviewsDataset(True)
+
+data_name = 'PolEval'
+train_dataset = PolEvalDataset("train")
+validation_dataset = PolEvalDataset("validation")
+test_dataset = PolEvalDataset("test")
+
+# data_name = 'HateTweets'
+# train_dataset = HateTweetsDataset("train")
+# validation_dataset = HateTweetsDataset("validation")
+# test_dataset = HateTweetsDataset("test")
+
 labels_ids = {'neg': 0, 'pos': 1}
 epochs = 4
 batch_size = 10
@@ -60,6 +69,14 @@ print('Created `valid_dataset` with %d examples!'%len(validation_dataset))
 # Move pytorch dataset into dataloader.
 valid_dataloader = DataLoader(validation_dataset, batch_size=batch_size, shuffle=False, collate_fn=classificaiton_collator)
 print('Created `eval_dataloader` with %d batches!'%len(valid_dataloader))
+
+print('Dealing with test...')
+# Create pytorch dataset.
+print('Created `test_dataset` with %d examples!'%len(test_dataset))
+
+# Move pytorch dataset into dataloader.
+test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=classificaiton_collator)
+print('Created `eval_dataloader` with %d batches!'%len(test_dataloader))
 
 # Note: AdamW is a class from the huggingface library (as opposed to pytorch) 
 optimizer = AdamW(model.parameters(),
@@ -106,7 +123,7 @@ plot_dict(all_acc, use_xlabel='Epochs', use_ylabel='Value', use_linestyles=['-',
 
 # Get prediction form model on validation data. This is where you should use
 # your test data.
-true_labels, predictions_labels, avg_epoch_loss = validation(valid_dataloader, device)
+true_labels, predictions_labels, avg_epoch_loss = validation(test_dataloader, device)
 
 # Create the evaluation report.
 evaluation_report = classification_report(true_labels, predictions_labels, labels=list(labels_ids.values()), target_names=list(labels_ids.keys()))
@@ -116,5 +133,7 @@ print(evaluation_report)
 # Plot confusion matrix.
 plot_confusion_matrix(y_true=true_labels, y_pred=predictions_labels, 
                       classes=list(labels_ids.keys()), normalize=True, 
-                      magnify=3,
+                      magnify=3, path=f"plots/{model_name_or_path}_{data_name}"
                       )
+
+torch.save(model.state_dict(), f"models/{model_name_or_path}_{data_name}")

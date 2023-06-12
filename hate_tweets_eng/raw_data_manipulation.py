@@ -31,7 +31,7 @@ def prepare_text(text):
 train_set = pd.read_csv('raw_data/train.csv')
 train_set = train_set.reset_index()
 train_set['tweet'] = train_set["tweet"].apply(prepare_text)
-print(train_set)
+# print(train_set)
 
 for index, row in train_set.iterrows():
     x_array.append(row['tweet'])
@@ -47,12 +47,14 @@ with open ("processed/X.npy", 'wb') as file:
 with open ("processed/Y.npy", 'wb') as file:
     np.save(file, y_array)
 
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+X_training, x_array_forTest, y_training, y_array_forTest = train_test_split(X, y, test_size=0.3, stratify=y, random_state=42)
+print(len(X_training), len(x_array_forTest), len(y_training), len(y_array_forTest))
+X_train, X_val, y_train, y_val = train_test_split(X_training, y_training, test_size=0.2, stratify=y_training, random_state=42)
 train_class_ratios = np.bincount(y_train) / len(y_train)
 val_class_ratios = np.bincount(y_val) / len(y_val)
 
-print("Training class ratios: ", train_class_ratios)
-print("Validation class ratios: ", val_class_ratios)
+# print("Training class ratios: ", train_class_ratios)
+# print("Validation class ratios: ", val_class_ratios)
 
 
 # Save train.npy
@@ -72,20 +74,8 @@ with open ('processed/y_val.npy', 'wb') as file:
 
 # # And the test set now
 
-x_array_forTest = []
-y_array_forTest = []
-
-test_set = pd.read_csv('raw_data/test.csv')
-test_set = test_set.reset_index()
-test_set['tweet'] = test_set["tweet"].apply(prepare_text)
-print(test_set)
-
-for index, row in test_set.iterrows():
-    x_array.append(row['tweet'])
-    # y_array.append(int(row['label']))
-
 with open ("processed/X_forTest.npy", 'wb') as file:
     np.save(file, x_array_forTest)
 
-# with open ("processed/Y_forTest.npy", 'wb') as file:
-#     np.save(file, y_array_forTest)
+with open ("processed/Y_forTest.npy", 'wb') as file:
+    np.save(file, y_array_forTest)

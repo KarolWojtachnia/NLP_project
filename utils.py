@@ -6,21 +6,55 @@ from tqdm.notebook import tqdm
 from torch.utils.data import Dataset
 
 # Class responsible for data handling
-class MovieReviewsDataset(Dataset):
 
-  def __init__(self, is_for_test):
+class PolEvalDataset(Dataset):
+  def __init__(self, data_type):
 
     self.texts = []
     self.labels = []
     X = None
     y = None
 
-    if not is_for_test:
-        X = np.load("X.npy")
-        y = np.load("y.npy")
-    else:
-        X = np.load("X_forTest.npy")
-        y = np.load("Y_forTest.npy")
+    if data_type == "train":
+        X = np.load("PolEval/processed/X_train.npy")
+        y = np.load("PolEval/processed/y_train.npy")
+    elif data_type == "validation":
+        X = np.load("PolEval/processed/X_val.npy")
+        y = np.load("PolEval/processed/y_val.npy")
+    elif data_type == "test":
+        X = np.load("PolEval/processed/X_forTest.npy")
+        y = np.load("PolEval/processed/Y_forTest.npy")
+    
+    self.texts = np.ndarray.tolist(X)
+    self.labels = np.ndarray.tolist(y)
+    self.n_examples = len(self.labels)
+    self.n_labels = np.unique(y).size
+    return
+
+  def __len__(self):
+    return self.n_examples
+
+  def __getitem__(self, item):
+    return {'text':self.texts[item],
+            'label':self.labels[item]}
+  
+class HateTweetsDataset(Dataset):
+  def __init__(self, data_type):
+
+    self.texts = []
+    self.labels = []
+    X = None
+    y = None
+
+    if data_type == "train":
+        X = np.load("hate_tweets_eng/processed/X_train.npy")
+        y = np.load("hate_tweets_eng/processed/y_train.npy")
+    elif data_type == "validation":
+        X = np.load("hate_tweets_eng/processed/X_val.npy")
+        y = np.load("hate_tweets_eng/processed/y_val.npy")
+    elif data_type == "test":
+        X = np.load("hate_tweets_eng/processed/X_forTest.npy")
+        y = np.load("hate_tweets_eng/processed/Y_forTest.npy")
     
     self.texts = np.ndarray.tolist(X)
     self.labels = np.ndarray.tolist(y)
