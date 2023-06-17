@@ -26,6 +26,11 @@ test_dataset = PolEvalDataset("test")
 # validation_dataset = HateTweetsDataset("validation")
 # test_dataset = HateTweetsDataset("test")
 
+# data_name = 'WhiteSupremacy'
+# train_dataset = WhiteSupremacyDataset("train")
+# validation_dataset = WhiteSupremacyDataset("validation")
+# test_dataset = WhiteSupremacyDataset("test")
+
 train
 labels_ids = {'neg': 0, 'pos': 1}
 epochs = 4

@@ -36,7 +36,8 @@ class PolEvalDataset(Dataset):
 
   def __getitem__(self, item):
     return {'text':self.texts[item],
-            'label':self.labels[item]}
+            'label':self.labels[item]
+}
   
 class HateTweetsDataset(Dataset):
   def __init__(self, data_type):
@@ -67,7 +68,40 @@ class HateTweetsDataset(Dataset):
 
   def __getitem__(self, item):
     return {'text':self.texts[item],
-            'label':self.labels[item]}
+            'label':self.labels[item]
+}
+  
+class WhiteSupremacyDataset(Dataset):
+  def __init__(self, data_type):
+
+    self.texts = []
+    self.labels = []
+    X = None
+    y = None
+
+    if data_type == "train":
+        X = np.load("dataset_white_supremacy/processed/X_train.npy")
+        y = np.load("dataset_white_supremacy/processed/y_train.npy")
+    elif data_type == "validation":
+        X = np.load("dataset_white_supremacy/processed/X_val.npy")
+        y = np.load("dataset_white_supremacy/processed/y_val.npy")
+    elif data_type == "test":
+        X = np.load("dataset_white_supremacy/processed/X_forTest.npy")
+        y = np.load("dataset_white_supremacy/processed/Y_forTest.npy")
+    
+    self.texts = np.ndarray.tolist(X)
+    self.labels = np.ndarray.tolist(y)
+    self.n_examples = len(self.labels)
+    self.n_labels = np.unique(y).size
+    return
+
+  def __len__(self):
+    return self.n_examples
+
+  def __getitem__(self, item):
+    return {'text':self.texts[item],
+            'label':self.labels[item]
+}
   
  
 
