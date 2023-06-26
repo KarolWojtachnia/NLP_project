@@ -1,5 +1,5 @@
 # NLP_project
-Repo do projektku z przetwarzania języka naturalnego
+Repo do projektu z przetwarzania języka naturalnego
 
 ## Datasets
 1) `PolEval`: http://2019.poleval.pl/index.php/tasks/task6 DONE
